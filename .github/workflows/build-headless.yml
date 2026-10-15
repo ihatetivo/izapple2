@@ -1,0 +1,20 @@
+name: Build izapple2 headless Linux
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Compile headless emulator
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o izapple2-headless-linux-amd64 ./frontend/headless
+          file izapple2-headless-linux-amd64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: izapple2-headless-linux-amd64
+          path: izapple2-headless-linux-amd64
