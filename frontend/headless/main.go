@@ -64,6 +64,25 @@ func main() {
 				spinWait(func() bool { return a.BreakPoint() })
 				a.ReleaseFastMode()
 			}
+		case "drives":
+			for i, drive := range a.GetRemovableMediaDrives() {
+				fmt.Printf("%d: %s %s\n", i+1, drive.Label, drive.Media)
+			}
+		case "disk":
+			if len(parts) < 3 {
+				fmt.Println("Usage: disk <drive-number> <image-path>")
+			} else if drive, err := strconv.Atoi(parts[1]); err != nil || drive < 1 || drive > len(a.GetRemovableMediaDrives()) {
+				fmt.Println("Invalid drive number; use drives to list drives")
+			} else if !a.IsPaused() {
+				fmt.Println("Pause the emulator before changing disks")
+			} else {
+				path := strings.Join(parts[2:], " ")
+				if err := a.LoadDisk(drive-1, path); err != nil {
+					fmt.Printf("Disk insertion failed: %v\n", err)
+				} else {
+					fmt.Printf("Mounted %s in drive %d\n", path, drive)
+				}
+			}
 		case "cycle":
 			fmt.Printf("%v\n", a.GetCycles())
 		case "reset":
@@ -149,6 +168,12 @@ Keyboard related commands:
 		Queues the enter key to the emulator. Alias for "key 13".
 	clearkeys
 		Clears the key queue.
+
+Disk related commands:
+	drives
+		Lists mounted removable drives.
+	disk <drive-number> <image-path>
+		Replaces the disk in a drive while paused.
 
 Screen related commands:
 	text
